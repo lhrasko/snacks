@@ -1,0 +1,11 @@
+@page
+@model AccountModel
+@{
+    ViewData["Title"] = "Account";
+}
+<div>
+    <div>Your balance: ₵@Model.Balance @if(Model.Overdue){<span class="text-red-500">(Overdue)</span>}</div>
+    <form method="post">
+        <button class="mt-2 p-2 bg-blue-600 text-white">Pay Now</button>
+    </form>
+</div>

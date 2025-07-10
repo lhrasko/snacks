@@ -1,0 +1,29 @@
+@page
+@model CartModel
+@{
+    ViewData["Title"] = "Cart";
+}
+<div id="cart"></div>
+<button id="checkout" class="mt-4 p-2 bg-green-600 text-white">Checkout</button>
+@section Scripts{
+<script>
+function render(){
+ const cart=JSON.parse(localStorage.getItem('cart')||'[]');
+ let html='';let sum=0;
+ cart.forEach(c=>{html+=`<div>${c.quantity} x ${c.productId} ₵${c.snapshotPrice}</div>`;sum+=c.quantity*c.snapshotPrice;});
+ html+=`<div>Total ₵${sum.toFixed(2)}</div>`;
+ document.getElementById('cart').innerHTML=html;
+}
+async function checkout(){
+ const cart=JSON.parse(localStorage.getItem('cart')||'[]');
+ if(!cart.length)return;
+ await fetch('/api/cart/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cart)});
+ localStorage.removeItem('cart');
+ alert('Order placed!');
+ render();
+}
+render();
+checkoutBtn=document.getElementById('checkout');
+checkoutBtn.addEventListener('click',checkout);
+</script>
+}
