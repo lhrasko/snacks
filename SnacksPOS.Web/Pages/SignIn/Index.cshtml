@@ -1,0 +1,12 @@
+@page
+@model SignInModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+<div class="max-w-sm mx-auto mt-10">
+    <form method="post" class="space-y-4">
+        <input asp-for="Input.Username" class="w-full p-2 border" placeholder="Username" />
+        <input asp-for="Input.Password" type="password" class="w-full p-2 border" placeholder="Password" />
+        <button class="w-full bg-blue-600 text-white p-2">Sign In</button>
+    </form>
+</div>

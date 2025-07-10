@@ -1,0 +1,25 @@
+@page
+@model SnacksModel
+@{
+    ViewData["Title"] = "Snacks";
+}
+<div class="grid grid-cols-2 gap-4">
+@foreach (var p in Model.Products)
+{
+    <div class="p-4 bg-white dark:bg-gray-700 rounded shadow transform active:scale-95 transition" onclick="addToCart(@p.Id,'@p.Name',@p.Price)">
+        <div class="font-bold">@p.Name</div>
+        <div class="text-sm">₵@p.Price</div>
+    </div>
+}
+</div>
+@section Scripts{
+<script>
+function addToCart(id,name,price){
+    const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+    const item = cart.find(i=>i.productId==id);
+    if(item){item.quantity++;}else{cart.push({productId:id,quantity:1,snapshotPrice:price});}
+    localStorage.setItem('cart',JSON.stringify(cart));
+    alert('Yum, snack added!');
+}
+</script>
+}

@@ -1,0 +1,41 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<SnacksPOS.Domain.ApplicationUser> SignInManager
+@inject UserManager<SnacksPOS.Domain.ApplicationUser> UserManager
+<!DOCTYPE html>
+<html lang="en" class="h-full" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SnacksPOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
+    </script>
+</head>
+<body class="min-h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+    <header class="p-4 shadow bg-white dark:bg-gray-800">
+        <div class="container mx-auto flex justify-between">
+            <a href="/Snacks" class="font-bold">SnacksPOS</a>
+            <nav>
+                <a href="/Snacks" class="mr-4">Snacks</a>
+                <a href="/Cart" class="mr-4">Cart</a>
+                <a href="/Account" class="mr-4">Account</a>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <form method="post" asp-page="/SignOut" class="inline">
+                        <button class="underline">Sign Out</button>
+                    </form>
+                }
+            </nav>
+        </div>
+    </header>
+    <main class="p-4 animate-fadeIn">
+        @RenderBody()
+    </main>
+    <footer class="p-4 text-center text-sm opacity-75">v@System.Reflection.Assembly.GetExecutingAssembly().GetName().Version</footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
