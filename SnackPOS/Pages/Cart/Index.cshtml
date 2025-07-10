@@ -1,0 +1,31 @@
+@page
+@model SnackPOS.Pages.Cart.IndexModel
+@{
+    ViewData["Title"] = "Cart";
+}
+<h1>Cart</h1>
+@if(Model.Items.Any())
+{
+    <table class="table">
+        <thead>
+        <tr><th>Product</th><th>Qty</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Product?.Name</td>
+                <td>@item.Quantity</td>
+                <td>$@item.Product?.Price</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <form method="post">
+        <button type="submit" class="btn btn-primary">Checkout</button>
+    </form>
+}
+else
+{
+    <p>No items in cart.</p>
+}

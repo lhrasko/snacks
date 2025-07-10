@@ -1,0 +1,22 @@
+@page
+@attribute [Authorize(Roles="Admin")]
+@model SnackPOS.Pages.Admin.Products.CreateModel
+@{
+    ViewData["Title"] = "New Product";
+}
+<h1>New Product</h1>
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Product.Name" class="form-label"></label>
+        <input asp-for="Product.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Product.Price" class="form-label"></label>
+        <input asp-for="Product.Price" class="form-control" />
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="Product.Available" class="form-check-input" />
+        <label asp-for="Product.Available" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
