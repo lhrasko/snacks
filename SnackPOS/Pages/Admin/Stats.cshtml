@@ -1,9 +1,0 @@
-@page
-@attribute [Authorize(Roles="Admin")]
-@model SnackPOS.Pages.Admin.StatsModel
-@{
-    ViewData["Title"] = "Sales Stats";
-}
-<h1>Sales Stats</h1>
-<p>Total Orders: @Model.TotalOrders</p>
-<p>Total Revenue: $@Model.TotalRevenue</p>
