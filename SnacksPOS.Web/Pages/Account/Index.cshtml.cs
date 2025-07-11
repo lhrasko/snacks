@@ -7,6 +7,7 @@ using SnacksPOS.Application.Ledger;
 namespace SnacksPOS.Web.Pages.Account;
 
 [Authorize]
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class AccountModel : PageModel
 {
     private readonly IMediator _mediator;

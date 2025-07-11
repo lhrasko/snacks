@@ -7,7 +7,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="text-center mb-12">
         <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🍿 Delicious Snacks
+            Delicious Snacks
         </h1>
         <p class="text-lg opacity-80 max-w-2xl mx-auto">
             Discover our amazing selection of fresh snacks and treats. 
@@ -50,11 +50,11 @@
                             <button class="quick-add-btn" 
                                     data-product-id="@product.Id"
                                     onclick="toggleCartItem(this)">
-                                <span class="add-text">
+                                <span class="add-text" style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
                                     <span>⚡</span>
                                     <span>Add</span>
                                 </span>
-                                <span class="remove-text" style="display: none;">
+                                <span class="remove-text" style="display: none; align-items: center; justify-content: center; gap: 0.25rem;">
                                     <span>❌</span>
                                     <span>Remove</span>
                                 </span>
@@ -160,6 +160,9 @@ function updateAllButtonStates() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const buttons = document.querySelectorAll('.quick-add-btn');
     
+    console.log('updateAllButtonStates called. Cart:', cart);
+    console.log('Found buttons:', buttons.length);
+    
     buttons.forEach(button => {
         const productId = parseInt(button.getAttribute('data-product-id'));
         const isInCart = cart.some(item => item.productId === productId);
@@ -167,14 +170,20 @@ function updateAllButtonStates() {
         const addText = button.querySelector('.add-text');
         const removeText = button.querySelector('.remove-text');
         
+        console.log(`Product ${productId}: isInCart=${isInCart}, addText=${!!addText}, removeText=${!!removeText}`);
+        
         if (isInCart) {
-            addText.style.display = 'none';
-            removeText.style.display = 'flex';
+            // Show remove text, hide add text
+            addText.style.cssText = 'display: none !important;';
+            removeText.style.cssText = 'display: flex !important; align-items: center; justify-content: center; gap: 0.25rem;';
             button.classList.add('in-cart');
+            console.log(`Product ${productId}: Set to REMOVE mode`);
         } else {
-            addText.style.display = 'flex';
-            removeText.style.display = 'none';
+            // Show add text, hide remove text
+            addText.style.cssText = 'display: flex !important; align-items: center; justify-content: center; gap: 0.25rem;';
+            removeText.style.cssText = 'display: none !important;';
             button.classList.remove('in-cart');
+            console.log(`Product ${productId}: Set to ADD mode`);
         }
     });
 }
@@ -183,17 +192,35 @@ function updateCartDisplay() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     cartCount = cart.reduce((total, item) => total + item.quantity, 0);
     
-    const checkoutFab = document.getElementById('checkoutFab');
+    console.log('updateCartDisplay called. Cart count:', cartCount);
+    console.log('Current cart:', cart);
     
-    console.log('Cart count:', cartCount);
-    console.log('Checkout button element:', checkoutFab);
+    // Try multiple ways to find the checkout button
+    const checkoutFab1 = document.getElementById('checkoutFab');
+    const checkoutFab2 = document.querySelector('#checkoutFab');
+    const checkoutFab3 = document.querySelector('.checkout-fab');
+    
+    console.log('getElementById result:', checkoutFab1);
+    console.log('querySelector #checkoutFab result:', checkoutFab2);
+    console.log('querySelector .checkout-fab result:', checkoutFab3);
+    
+    // List all elements with checkout in their ID or class
+    const allElements = document.querySelectorAll('*');
+    const checkoutElements = Array.from(allElements).filter(el => 
+        el.id.includes('checkout') || 
+        el.className.includes('checkout') ||
+        el.tagName.toLowerCase() === 'button'
+    );
+    console.log('All elements with checkout or buttons:', checkoutElements);
+    
+    const checkoutFab = checkoutFab1 || checkoutFab2 || checkoutFab3;
     
     if (checkoutFab) {
+        console.log('✅ Checkout button found!');
         if (cartCount > 0) {
             checkoutFab.style.display = 'flex';
-            
-            // Update the button text with the new format
             checkoutFab.innerHTML = `View Cart • ${cartCount} item${cartCount !== 1 ? 's' : ''}`;
+            console.log('✅ Checkout button shown with text:', checkoutFab.innerHTML);
             
             // Add bounce animation
             checkoutFab.classList.add('dramatic-cart-bounce');
@@ -202,18 +229,50 @@ function updateCartDisplay() {
             }, 1000);
         } else {
             checkoutFab.style.display = 'none';
+            console.log('❌ Checkout button hidden (cart empty)');
         }
+    } else {
+        console.error('❌ Checkout button NOT found! Element does not exist in DOM.');
+        // Try to create it manually
+        console.log('Attempting to create checkout button manually...');
+        const button = document.createElement('button');
+        button.id = 'checkoutFab';
+        button.className = 'checkout-fab';
+        button.onclick = () => window.location.href = '/Cart';
+        button.innerHTML = `View Cart • ${cartCount} item${cartCount !== 1 ? 's' : ''}`;
+        button.style.display = cartCount > 0 ? 'flex' : 'none';
+        document.body.appendChild(button);
+        console.log('✅ Manually created checkout button');
     }
 }
 
 // Update cart count and button states on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
-    const checkoutFab = document.getElementById('checkoutFab');
-    console.log('Checkout button element found:', checkoutFab);
     
+    // Call immediately
     updateAllButtonStates();
     updateCartDisplay();
+    
+    // Also call after a short delay to ensure everything is ready
+    setTimeout(() => {
+        console.log('Running updateAllButtonStates after delay...');
+        updateAllButtonStates();
+        updateCartDisplay();
+    }, 100);
+    
+    // Try again after a longer delay to ensure layout is fully loaded
+    setTimeout(() => {
+        console.log('Final attempt to find checkout button...');
+        const checkoutFab = document.getElementById('checkoutFab');
+        console.log('Checkout button element (delayed):', checkoutFab);
+        if (checkoutFab) {
+            console.log('Checkout button found after delay!');
+            updateCartDisplay();
+        } else {
+            console.error('Checkout button still not found after delay');
+        }
+    }, 500);
 });
 
 // Update cart display when storage changes (useful for multiple tabs)

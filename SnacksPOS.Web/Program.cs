@@ -11,7 +11,16 @@ using SnacksPOS.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
-services.AddRazorPages();
+services.AddRazorPages(options =>
+{
+    // Add global no-cache filter to all Razor Pages
+    options.Conventions.ConfigureFilter(new Microsoft.AspNetCore.Mvc.ResponseCacheAttribute
+    {
+        Duration = 0,
+        Location = Microsoft.AspNetCore.Mvc.ResponseCacheLocation.None,
+        NoStore = true
+    });
+});
 services.AddApplication();
 services.AddInfrastructure(builder.Configuration);
 
@@ -56,7 +65,31 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Add middleware to set no-cache headers for all responses
+app.Use(async (context, next) =>
+{
+    // Set no-cache headers for all responses
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    
+    await next();
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        // For development, disable caching on static files too
+        if (app.Environment.IsDevelopment())
+        {
+            context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.Context.Response.Headers["Pragma"] = "no-cache";
+            context.Context.Response.Headers["Expires"] = "0";
+        }
+    }
+});
 app.UseRouting();
 app.UseCors("cafeteria");
 app.UseAuthentication();

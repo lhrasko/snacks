@@ -5,6 +5,7 @@ using SnacksPOS.Infrastructure;
 
 namespace SnacksPOS.Web.Pages;
 
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class SignOutModel : PageModel
 {
     private readonly SignInManager<ApplicationUser> _signInManager;

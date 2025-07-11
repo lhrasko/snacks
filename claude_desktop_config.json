@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-stripe"],
+      "env": {
+        "STRIPE_API_KEY": "sk_test_your_stripe_secret_key_here"
+      }
+    }
+  }
+}

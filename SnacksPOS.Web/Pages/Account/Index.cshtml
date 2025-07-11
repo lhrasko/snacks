@@ -36,8 +36,8 @@
             @if(Model.Balance > 0)
             {
                 <form method="post" class="mt-4">
-                    <button type="submit" class="btn-primary">
-                        <span>💳</span>
+                    <button type="submit" class="btn btn-primary w-full lg:w-auto min-w-48 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        <span class="mr-2">💳</span>
                         Pay Balance Now
                     </button>
                 </form>
@@ -57,24 +57,30 @@
         </div>
 
         <!-- Account Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div class="card text-center">
-                <div class="text-2xl mb-2">📊</div>
-                <h3 class="font-semibold mb-2">Transaction History</h3>
-                <p class="text-sm opacity-75 mb-4">View your recent purchases and payments</p>
-                <button class="btn-outline w-full">View History</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="card text-center hover:shadow-lg transition-shadow duration-200">
+                <div class="text-3xl mb-3">📊</div>
+                <h3 class="font-semibold mb-3 text-lg">Transaction History</h3>
+                <p class="text-sm opacity-75 mb-6">View your recent purchases and payments</p>
+                <button class="btn btn-outline w-full hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+                    <span class="mr-2">👁️</span>
+                    View History
+                </button>
             </div>
             
-            <div class="card text-center">
-                <div class="text-2xl mb-2">⚙️</div>
-                <h3 class="font-semibold mb-2">Account Settings</h3>
-                <p class="text-sm opacity-75 mb-4">Update your profile and preferences</p>
-                <button class="btn-outline w-full">Edit Profile</button>
+            <div class="card text-center hover:shadow-lg transition-shadow duration-200">
+                <div class="text-3xl mb-3">⚙️</div>
+                <h3 class="font-semibold mb-3 text-lg">Account Settings</h3>
+                <p class="text-sm opacity-75 mb-6">Update your profile and preferences</p>
+                <button class="btn btn-outline w-full hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+                    <span class="mr-2">✏️</span>
+                    Edit Profile
+                </button>
             </div>
         </div>
 
         <!-- Sign Out Section -->
-        <div class="card border-red-200 bg-red-50/50 dark:bg-red-900/20">
+        <div class="card border-red-200 bg-red-50/50 dark:bg-red-900/20 hover:shadow-lg transition-all duration-200">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="font-semibold text-red-800 dark:text-red-200 mb-1">
@@ -85,7 +91,8 @@
                     </p>
                 </div>
                 <form method="post" asp-page="/SignOut" class="ml-4">
-                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    <button type="submit" class="btn bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 min-w-24">
+                        <span class="mr-2">🚪</span>
                         Sign Out
                     </button>
                 </form>

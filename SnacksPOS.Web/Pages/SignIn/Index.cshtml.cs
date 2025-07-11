@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SnacksPOS.Web.Pages.SignIn;
 
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class SignInModel : PageModel
 {
     private readonly SignInManager<ApplicationUser> _signInManager;

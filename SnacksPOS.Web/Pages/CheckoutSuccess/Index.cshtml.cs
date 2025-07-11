@@ -1,11 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SnacksPOS.Application.Ledger;
 
 namespace SnacksPOS.Web.Pages.CheckoutSuccess;
 
 [Authorize]
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class IndexModel : PageModel
 {
     private readonly IMediator _mediator;
