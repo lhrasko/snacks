@@ -11,13 +11,11 @@ public class MonthlyReminderService : BackgroundService
 {
     private readonly IServiceProvider _sp;
     private readonly ILogger<MonthlyReminderService> _logger;
-    private readonly IEmailSender _email;
 
-    public MonthlyReminderService(IServiceProvider sp, ILogger<MonthlyReminderService> logger, IEmailSender email)
+    public MonthlyReminderService(IServiceProvider sp, ILogger<MonthlyReminderService> logger)
     {
         _sp = sp;
         _logger = logger;
-        _email = email;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,6 +35,7 @@ public class MonthlyReminderService : BackgroundService
         using var scope = _sp.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
         var unpaid = await db.LedgerEntries.Where(l => !l.Paid).ToListAsync(ct);
         var users = unpaid.GroupBy(u => u.UserId);
         foreach (var group in users)
@@ -44,7 +43,7 @@ public class MonthlyReminderService : BackgroundService
             var user = await userMgr.FindByIdAsync(group.Key);
             if (user == null) continue;
             var total = group.Sum(l => l.Total);
-            await _email.SendAsync(user.Email ?? user.UserName!, "Snack balance reminder", $"You owe ₵{total:0.00}. Thanks!");
+            await emailSender.SendAsync(user.Email ?? user.UserName!, "Snack balance reminder", $"You owe ${total:0.00}. Thanks!");
         }
         _logger.LogInformation("Monthly reminders sent");
     }

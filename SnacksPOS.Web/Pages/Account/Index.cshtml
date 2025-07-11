@@ -3,9 +3,100 @@
 @{
     ViewData["Title"] = "Account";
 }
-<div>
-    <div>Your balance: ₵@Model.Balance @if(Model.Overdue){<span class="text-red-500">(Overdue)</span>}</div>
-    <form method="post">
-        <button class="mt-2 p-2 bg-blue-600 text-white">Pay Now</button>
-    </form>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Account Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                👤 My Account
+            </h1>
+            <p class="text-lg opacity-80">Manage your account and view your balance</p>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="card mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold flex items-center">
+                    <span class="mr-2">💰</span>
+                    Account Balance
+                </h2>
+                @if(Model.Overdue)
+                {
+                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
+                        ⚠️ Overdue
+                    </span>
+                }
+            </div>
+            
+            <div class="text-3xl font-bold mb-4 @(Model.Overdue ? "text-red-600" : "text-green-600")">
+                $@Model.Balance.ToString("F2")
+            </div>
+            
+            @if(Model.Balance > 0)
+            {
+                <form method="post" class="mt-4">
+                    <button type="submit" class="btn-primary">
+                        <span>💳</span>
+                        Pay Balance Now
+                    </button>
+                </form>
+            }
+            else if(Model.Balance < 0)
+            {
+                <div class="text-sm opacity-75 mt-2">
+                    You have a credit balance. Enjoy your snacks! 🎉
+                </div>
+            }
+            else
+            {
+                <div class="text-sm opacity-75 mt-2">
+                    Your account is all settled up! 👍
+                </div>
+            }
+        </div>
+
+        <!-- Account Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="card text-center">
+                <div class="text-2xl mb-2">📊</div>
+                <h3 class="font-semibold mb-2">Transaction History</h3>
+                <p class="text-sm opacity-75 mb-4">View your recent purchases and payments</p>
+                <button class="btn-outline w-full">View History</button>
+            </div>
+            
+            <div class="card text-center">
+                <div class="text-2xl mb-2">⚙️</div>
+                <h3 class="font-semibold mb-2">Account Settings</h3>
+                <p class="text-sm opacity-75 mb-4">Update your profile and preferences</p>
+                <button class="btn-outline w-full">Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Sign Out Section -->
+        <div class="card border-red-200 bg-red-50/50 dark:bg-red-900/20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-red-800 dark:text-red-200 mb-1">
+                        🚪 Sign Out
+                    </h3>
+                    <p class="text-sm text-red-600 dark:text-red-300">
+                        End your current session and return to the login page
+                    </p>
+                </div>
+                <form method="post" asp-page="/SignOut" class="ml-4">
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="text-center mt-8">
+            <a href="/Snacks" class="text-blue-600 hover:text-blue-700 font-medium">
+                ← Back to Snacks
+            </a>
+        </div>
+    </div>
 </div>

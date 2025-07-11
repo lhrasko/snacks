@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace SnacksPOS.Domain;
+namespace SnacksPOS.Infrastructure;
 
 public class ApplicationUser : IdentityUser
 {

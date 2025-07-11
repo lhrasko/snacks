@@ -15,6 +15,14 @@ public static class ServiceCollectionExtensions
         services.AddIdentity<ApplicationUser, IdentityRole>(o =>
         {
             o.SignIn.RequireConfirmedAccount = false;
+            o.SignIn.RequireConfirmedEmail = false;
+            o.SignIn.RequireConfirmedPhoneNumber = false;
+            // Relax password requirements for demo
+            o.Password.RequireDigit = false;
+            o.Password.RequireLowercase = false;
+            o.Password.RequireUppercase = false;
+            o.Password.RequireNonAlphanumeric = false;
+            o.Password.RequiredLength = 1;
         })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();

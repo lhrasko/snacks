@@ -1,41 +1,128 @@
 @using Microsoft.AspNetCore.Identity
-@inject SignInManager<SnacksPOS.Domain.ApplicationUser> SignInManager
-@inject UserManager<SnacksPOS.Domain.ApplicationUser> UserManager
+@inject SignInManager<SnacksPOS.Infrastructure.ApplicationUser> SignInManager
+@inject UserManager<SnacksPOS.Infrastructure.ApplicationUser> UserManager
 <!DOCTYPE html>
-<html lang="en" class="h-full" data-theme="dark">
+<html lang="en" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SnacksPOS</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js');
         }
     </script>
 </head>
-<body class="min-h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
-    <header class="p-4 shadow bg-white dark:bg-gray-800">
-        <div class="container mx-auto flex justify-between">
-            <a href="/Snacks" class="font-bold">SnacksPOS</a>
-            <nav>
-                <a href="/Snacks" class="mr-4">Snacks</a>
-                <a href="/Cart" class="mr-4">Cart</a>
-                <a href="/Account" class="mr-4">Account</a>
-                @if (SignInManager.IsSignedIn(User))
+<body class="min-h-full font-inter">
+    <header id="main-header" class="app-header">
+        <div class="container">
+            <a href="/Snacks" class="app-title text-lg font-semibold">SnacksPOS</a>
+            <nav class="flex items-center space-x-1">
+                <a href="/Snacks" class="nav-link text-sm px-2 py-1">🍎 Snacks</a>
+                <a href="/Account" class="nav-link text-sm px-2 py-1">👤 Account</a>
+                @if (!SignInManager.IsSignedIn(User))
                 {
-                    <form method="post" asp-page="/SignOut" class="inline">
-                        <button class="underline">Sign Out</button>
-                    </form>
+                    <a href="/SignIn" class="nav-link text-sm px-2 py-1 bg-primary-500/20 hover:bg-primary-500/30 text-primary-100">
+                        🔑 Sign In
+                    </a>
                 }
             </nav>
         </div>
     </header>
-    <main class="p-4 animate-fadeIn">
+    
+    <main class="fade-in">
         @RenderBody()
     </main>
-    <footer class="p-4 text-center text-sm opacity-75">v@System.Reflection.Assembly.GetExecutingAssembly().GetName().Version</footer>
+    
+    <!-- Global Floating Checkout Button -->
+    <button id="checkoutFab" class="checkout-fab" onclick="window.location.href='/Cart'" style="display: none;">
+        View Cart
+    </button>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 SnacksPOS - Modern Point of Sale System</p>
+            <p class="text-xs opacity-60 mt-1">Built with ❤️ using ASP.NET Core & Modern UI</p>
+        </div>
+    </footer>
+    
     @await RenderSectionAsync("Scripts", required: false)
+    
+    <script>
+        // Auto-hide header functionality
+        let lastScrollTop = 0;
+        let isHeaderVisible = true;
+        const header = document.getElementById('main-header');
+        const scrollThreshold = 10;
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (Math.abs(scrollTop - lastScrollTop) < scrollThreshold) {
+                return;
+            }
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down & past initial scroll
+                if (isHeaderVisible) {
+                    header.classList.add('hidden');
+                    isHeaderVisible = false;
+                }
+            } else {
+                // Scrolling up
+                if (!isHeaderVisible) {
+                    header.classList.remove('hidden');
+                    isHeaderVisible = true;
+                }
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+        
+        // Handle checkout FAB behavior based on page
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutFab = document.getElementById('checkoutFab');
+            if (checkoutFab) {
+                if (window.location.pathname === '/Cart') {
+                    // On cart page, change to checkout functionality
+                    checkoutFab.onclick = function() {
+                        // Trigger the checkout function from the cart page
+                        if (typeof checkout === 'function') {
+                            checkout();
+                        }
+                    };
+                    // Let the cart page handle visibility
+                } else {
+                    // On other pages, keep original "View Cart" functionality
+                    checkoutFab.onclick = function() {
+                        window.location.href = '/Cart';
+                    };
+                }
+            }
+        });
+    </script>
 </body>
 </html>

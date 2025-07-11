@@ -1,29 +1,385 @@
 @page
 @model CartModel
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Shopping Cart - SnacksPOS";
 }
-<div id="cart"></div>
-<button id="checkout" class="mt-4 p-2 bg-green-600 text-white">Checkout</button>
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            🛒 Your Cart
+        </h1>
+        <p class="text-lg opacity-80">
+            Review your items and checkout when ready
+        </p>
+    </div>
+
+    <!-- Cart Content -->
+    <div id="cartContent" class="space-y-6">
+        <!-- Cart items will be rendered here -->
+    </div>
+
+    <!-- Empty Cart State -->
+    <div id="emptyCart" class="text-center py-16" style="display: none;">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-2xl font-bold mb-4">Your cart is empty</h2>
+        <p class="text-lg opacity-75 mb-6">
+            Add some delicious snacks to get started!
+        </p>
+        <a href="/Snacks" class="btn btn-primary">
+            🍎 Browse Snacks
+        </a>
+    </div>
+
+    <!-- Back to Snacks -->
+    <div class="text-center mt-8">
+        <a href="/Snacks" class="text-sm opacity-75 hover:opacity-100 transition-opacity">
+            ← Continue Shopping
+        </a>
+    </div>
+</div>
+
 @section Scripts{
 <script>
-function render(){
- const cart=JSON.parse(localStorage.getItem('cart')||'[]');
- let html='';let sum=0;
- cart.forEach(c=>{html+=`<div>${c.quantity} x ${c.productId} ₵${c.snapshotPrice}</div>`;sum+=c.quantity*c.snapshotPrice;});
- html+=`<div>Total ₵${sum.toFixed(2)}</div>`;
- document.getElementById('cart').innerHTML=html;
+let cart = [];
+
+function loadCart() {
+    cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    renderCart();
 }
-async function checkout(){
- const cart=JSON.parse(localStorage.getItem('cart')||'[]');
- if(!cart.length)return;
- await fetch('/api/cart/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cart)});
- localStorage.removeItem('cart');
- alert('Order placed!');
- render();
+
+function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Update the global checkout button counter
+    window.dispatchEvent(new StorageEvent('storage', { key: 'cart' }));
 }
-render();
-checkoutBtn=document.getElementById('checkout');
-checkoutBtn.addEventListener('click',checkout);
+
+function saveCartSilently() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Don't dispatch storage event to prevent full re-render
+}
+
+function updateQuantity(productId, newQuantity, buttonElement) {
+    const item = cart.find(item => item.productId == productId);
+    if (item) {
+        if (newQuantity <= 0) {
+            removeItem(productId);
+        } else {
+            const oldQuantity = item.quantity;
+            item.quantity = newQuantity;
+            
+            // Save cart silently to prevent auto re-render from storage event
+            saveCartSilently();
+            
+            // Add dramatic animation to the clicked button
+            if (buttonElement) {
+                buttonElement.classList.add('dramatic-pulse');
+                setTimeout(() => {
+                    buttonElement.classList.remove('dramatic-pulse');
+                }, 600);
+            }
+            
+            // Find and animate the quantity display, then update only the necessary elements
+            const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+            if (cartItem) {
+                const quantityDisplay = cartItem.querySelector('.quantity-display');
+                if (quantityDisplay) {
+                    quantityDisplay.classList.add('dramatic-bounce');
+                    setTimeout(() => {
+                        quantityDisplay.classList.remove('dramatic-bounce');
+                        // Update only the specific elements that changed
+                        updateSpecificCartElements(productId, item);
+                    }, 800);
+                } else {
+                    updateSpecificCartElements(productId, item);
+                }
+            }
+        }
+    }
+}
+
+function updateSpecificCartElements(productId, item) {
+    const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+    if (!cartItem) return;
+    
+    // Update quantity display
+    const quantityDisplay = cartItem.querySelector('.quantity-display');
+    if (quantityDisplay) {
+        quantityDisplay.textContent = item.quantity;
+    }
+    
+    // Update item total
+    const itemTotal = item.quantity * item.snapshotPrice;
+    const totalElement = cartItem.querySelector('.text-right .font-bold.text-lg');
+    if (totalElement) {
+        totalElement.textContent = `$${itemTotal.toFixed(2)}`;
+    }
+    
+    // Update button onclick attributes and disabled state
+    const minusButton = cartItem.querySelector('button[onclick*="updateQuantity"]:first-child');
+    const plusButton = cartItem.querySelector('button[onclick*="updateQuantity"]:last-child');
+    
+    if (minusButton) {
+        minusButton.setAttribute('onclick', `updateQuantity(${productId}, ${item.quantity - 1}, this)`);
+        minusButton.disabled = item.quantity <= 1;
+    }
+    
+    if (plusButton) {
+        plusButton.setAttribute('onclick', `updateQuantity(${productId}, ${item.quantity + 1}, this)`);
+    }
+    
+    // Update cart summary
+    updateCartSummaryOnly();
+}
+
+function updateCartItemDisplay(productId, item) {
+    const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+    if (cartItem) {
+        // Update quantity display
+        const quantityDisplay = cartItem.querySelector('.quantity-display');
+        if (quantityDisplay) {
+            quantityDisplay.textContent = item.quantity;
+        }
+        
+        // Update item total
+        const itemTotal = item.quantity * item.snapshotPrice;
+        const totalElement = cartItem.querySelector('.font-bold.text-lg');
+        if (totalElement) {
+            totalElement.textContent = `$${itemTotal.toFixed(2)}`;
+        }
+        
+        // Update minus button disabled state
+        const minusButton = cartItem.querySelector('button[onclick*="' + (item.quantity - 1) + '"]');
+        if (minusButton) {
+            if (item.quantity <= 1) {
+                minusButton.disabled = true;
+            } else {
+                minusButton.disabled = false;
+            }
+        }
+        
+        // Update button onclick handlers
+        const buttons = cartItem.querySelectorAll('button[onclick*="updateQuantity"]');
+        buttons.forEach(button => {
+            if (button.textContent.trim() === '−') {
+                button.setAttribute('onclick', `updateQuantity(${productId}, ${item.quantity - 1}, this)`);
+            } else if (button.textContent.trim() === '+') {
+                button.setAttribute('onclick', `updateQuantity(${productId}, ${item.quantity + 1}, this)`);
+            }
+        });
+        
+        // Update cart summary without re-rendering
+        updateCartSummary();
+    }
+}
+
+function removeItem(productId) {
+    // Add dramatic animation before removing
+    const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+    if (cartItem) {
+        cartItem.classList.add('dramatic-shake');
+        setTimeout(() => {
+            cartItem.classList.add('dramatic-slide-down');
+            setTimeout(() => {
+                cart = cart.filter(item => item.productId != productId);
+                saveCart();
+                renderCart();
+            }, 400);
+        }, 800);
+    } else {
+        cart = cart.filter(item => item.productId != productId);
+        saveCart();
+        renderCart();
+    }
+}
+
+function renderCart() {
+    const cartContent = document.getElementById('cartContent');
+    const emptyCart = document.getElementById('emptyCart');
+    
+    if (cart.length === 0) {
+        cartContent.style.display = 'none';
+        emptyCart.style.display = 'block';
+        updateCheckoutButton(0, 0);
+        return;
+    }
+    
+    emptyCart.style.display = 'none';
+    cartContent.style.display = 'block';
+    
+    // Render cart items
+    let html = '';
+    let subtotal = 0;
+    let totalItems = 0;
+    
+    cart.forEach((item, index) => {
+        const itemTotal = item.quantity * item.snapshotPrice;
+        subtotal += itemTotal;
+        totalItems += item.quantity;
+        
+        // Get product name (fallback to ID if not available)
+        const productName = getProductName(item.productId);
+        const productEmoji = getProductEmoji(productName);
+        
+        html += `
+            <div class="card cart-item dramatic-slide-up" data-product-id="${item.productId}">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                    <!-- Product Info -->
+                    <div class="flex items-center gap-4 flex-1">
+                        <div class="text-3xl">${productEmoji}</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg">${productName}</h3>
+                            <p class="text-sm opacity-75">$${item.snapshotPrice.toFixed(2)} each</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity Controls -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="updateQuantity(${item.productId}, ${item.quantity - 1}, this)" 
+                                class="btn-icon btn-secondary dramatic-hover" 
+                                ${item.quantity <= 1 ? 'disabled' : ''}>
+                            −
+                        </button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.productId}, ${item.quantity + 1}, this)" 
+                                class="btn-icon btn-secondary dramatic-hover">
+                            +
+                        </button>
+                    </div>
+                    
+                    <!-- Item Total -->
+                    <div class="text-right">
+                        <div class="font-bold text-lg">$${itemTotal.toFixed(2)}</div>
+                        <button onclick="removeItem(${item.productId})" 
+                                class="text-sm text-red-500 hover:text-red-700 transition-colors dramatic-hover">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    cartContent.innerHTML = html;
+    
+    // Update checkout button with total
+    updateCheckoutButton(subtotal, totalItems);
+}
+
+function updateCartSummaryOnly() {
+    let subtotal = 0;
+    let totalItems = 0;
+    
+    cart.forEach(item => {
+        subtotal += item.quantity * item.snapshotPrice;
+        totalItems += item.quantity;
+    });
+    
+    // Update checkout button with total
+    updateCheckoutButton(subtotal, totalItems);
+}
+
+function updateCheckoutButton(subtotal, totalItems) {
+    const checkoutFab = document.getElementById('checkoutFab');
+    
+    if (checkoutFab && window.location.pathname === '/Cart') {
+        if (totalItems > 0) {
+            checkoutFab.innerHTML = `<span>🚀</span><span>Checkout • $${subtotal.toFixed(2)}</span>`;
+            checkoutFab.style.display = 'flex';
+        } else {
+            checkoutFab.style.display = 'none';
+        }
+    }
+}
+
+function getProductName(productId) {
+    // Product name mapping (you could fetch this from an API)
+    const productNames = {
+        1: 'Trail Mix',
+        2: 'Protein Bar', 
+        3: 'Veggie Chips'
+    };
+    return productNames[productId] || `Product #${productId}`;
+}
+
+function getProductEmoji(productName) {
+    const name = productName.toLowerCase();
+    if (name.includes('trail')) return '🥜';
+    if (name.includes('protein')) return '💪';
+    if (name.includes('chips')) return '🍟';
+    if (name.includes('cookie')) return '🍪';
+    if (name.includes('drink')) return '🥤';
+    return '🍎';
+}
+
+// Make checkout function globally available
+window.checkout = async function() {
+    if (cart.length === 0) return;
+    
+    const checkoutBtn = document.getElementById('checkoutFab');
+    const originalText = checkoutBtn.innerHTML;
+    let checkoutSuccessful = false;
+    
+    try {
+        // Show loading state
+        checkoutBtn.innerHTML = '<span class="loading"></span><span>Processing...</span>';
+        checkoutBtn.disabled = true;
+        
+        const response = await fetch('/api/cart/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cart)
+        });
+        
+        if (response.ok) {
+            checkoutSuccessful = true;
+            // Show success message on button before redirect
+            checkoutBtn.innerHTML = '<span>✅</span><span>Success!</span>';
+            
+            // Clear cart and redirect after a brief moment
+            setTimeout(() => {
+                cart = [];
+                saveCartSilently();
+                window.location.href = '/checkout-success';
+            }, 800);
+        } else {
+            throw new Error('Checkout failed');
+        }
+    } catch (error) {
+        console.error('Checkout error:', error);
+    } finally {
+        // Only reset button if checkout was not successful
+        if (!checkoutSuccessful) {
+            checkoutBtn.innerHTML = originalText;
+            checkoutBtn.disabled = false;
+        }
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadCart();
+    
+    // Ensure checkout button is updated after a small delay to allow DOM to settle
+    setTimeout(function() {
+        let subtotal = 0;
+        let totalItems = 0;
+        cart.forEach(item => {
+            subtotal += item.quantity * item.snapshotPrice;
+            totalItems += item.quantity;
+        });
+        updateCheckoutButton(subtotal, totalItems);
+    }, 100);
+    
+    // Listen for cart updates from other pages
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cart') {
+            loadCart();
+        }
+    });
+});
 </script>
 }

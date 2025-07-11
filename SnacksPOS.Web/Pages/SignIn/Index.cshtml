@@ -2,11 +2,65 @@
 @model SignInModel
 @{
     ViewData["Title"] = "Sign In";
+    Layout = null;
 }
-<div class="max-w-sm mx-auto mt-10">
-    <form method="post" class="space-y-4">
-        <input asp-for="Input.Username" class="w-full p-2 border" placeholder="Username" />
-        <input asp-for="Input.Password" type="password" class="w-full p-2 border" placeholder="Password" />
-        <button class="w-full bg-blue-600 text-white p-2">Sign In</button>
-    </form>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In - SnacksPOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body class="signin-container">
+    <div class="signin-card slide-up">
+        <div class="text-center mb-8">
+            <h1 class="app-title text-3xl mb-2">🍿 SnacksPOS</h1>
+            <p class="text-sm opacity-75">Welcome back! Please sign in to continue</p>
+        </div>
+        
+        <div asp-validation-summary="All" class="validation-summary-errors mb-6"></div>
+        
+        <form method="post" class="space-y-6">
+            <div class="form-group">
+                <label asp-for="Input.Username" class="form-label">👤 Username</label>
+                <input asp-for="Input.Username" class="form-input" placeholder="Enter your username" autofocus />
+                <span asp-validation-for="Input.Username" class="field-validation-error"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Input.Password" class="form-label">🔒 Password</label>
+                <input asp-for="Input.Password" type="password" class="form-input" placeholder="Enter your password" />
+                <span asp-validation-for="Input.Password" class="field-validation-error"></span>
+            </div>
+            
+            <button type="submit" class="btn-primary w-full text-lg py-4">
+                🚀 Sign In
+            </button>
+        </form>
+        
+        <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-white/20">
+            <h3 class="font-semibold mb-3 text-center">🧪 Demo Credentials</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div class="bg-white/50 dark:bg-black/20 p-3 rounded-lg text-center">
+                    <p class="font-semibold text-blue-600 dark:text-blue-400">👨‍💼 Admin Access</p>
+                    <p class="font-mono">admin / password</p>
+                </div>
+                <div class="bg-white/50 dark:bg-black/20 p-3 rounded-lg text-center">
+                    <p class="font-semibold text-green-600 dark:text-green-400">👤 Demo User</p>
+                    <p class="font-mono">demo / password</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6">
+            <a href="/Snacks" class="text-sm opacity-75 hover:opacity-100 transition-opacity">
+                ← Back to Snacks
+            </a>
+        </div>
+    </div>
+</body>
+</html>

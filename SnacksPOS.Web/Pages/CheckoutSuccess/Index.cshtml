@@ -1,0 +1,111 @@
+@page "/checkout-success"
+@model SnacksPOS.Web.Pages.CheckoutSuccess.IndexModel
+@{
+    ViewData["Title"] = "Checkout Success";
+}
+
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <!-- Success Animation Container -->
+    <div class="text-center mb-8">
+        <div class="success-celebration mx-auto w-32 h-32 mb-6 flex items-center justify-center text-6xl bg-green-100 dark:bg-green-900 rounded-full dramatic-bounce">
+            🎉
+        </div>
+        <h1 class="text-4xl font-bold text-green-600 dark:text-green-400 mb-4 dramatic-slide-up">
+            Payment Successful!
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-400 dramatic-slide-up">
+            Thanks for your purchase! Your taste buds are about to be very happy!
+        </p>
+        <div class="flex justify-center space-x-2 text-2xl mt-4">
+            <span class="animate-bounce" style="animation-delay: 0s;">🍿</span>
+            <span class="animate-bounce" style="animation-delay: 0.1s;">🍫</span>
+            <span class="animate-bounce" style="animation-delay: 0.2s;">🥤</span>
+            <span class="animate-bounce" style="animation-delay: 0.3s;">🍪</span>
+            <span class="animate-bounce" style="animation-delay: 0.4s;">🍎</span>
+        </div>
+    </div>
+
+    <!-- Account Balance Information -->
+    <div class="card text-center mb-8 dramatic-slide-up">
+        <div class="space-y-4">
+            <div class="text-6xl">💰</div>
+            <h2 class="text-2xl font-semibold">Account Balance</h2>
+            <div class="text-4xl font-bold @(Model.Balance < 0 ? "text-red-600" : "text-green-600")">
+                $@Model.Balance.ToString("F2")
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">
+                @if (Model.Balance < 0)
+                {
+                    @if (Model.Overdue)
+                    {
+                        <span class="text-red-600 font-semibold">⚠️ Past Due</span>
+                    }
+                    else
+                    {
+                        <span>Due by @Model.DueDate.ToString("MMMM dd, yyyy")</span>
+                    }
+                }
+                else
+                {
+                    <span>You're all caught up! 🎉</span>
+                }
+                <br />
+                <span class="text-sm opacity-75">Next due date: @Model.DueDate.ToString("MMMM dd, yyyy")</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-4">
+        <a href="/Snacks" class="btn btn-primary w-full text-lg py-4 dramatic-hover flex items-center justify-center space-x-2">
+            <span>🍎</span>
+            <span>Get More Snacks</span>
+        </a>
+        
+        <a href="/Account" class="btn btn-secondary w-full text-lg py-3 dramatic-hover flex items-center justify-center space-x-2">
+            <span>💰</span>
+            <span>My Account</span>
+        </a>
+        
+        <div class="text-center">
+            <a href="/" class="text-sm opacity-75 hover:opacity-100 transition-opacity">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Fun Facts or Tips -->
+    <div class="mt-12 text-center opacity-60">
+        <p class="text-sm">
+            💡 Pro tip: Your balance is automatically updated!
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some fun confetti effect
+    setTimeout(() => {
+        const celebration = document.querySelector('.success-celebration');
+        if (celebration) {
+            celebration.classList.add('dramatic-pulse');
+            setTimeout(() => {
+                celebration.classList.remove('dramatic-pulse');
+            }, 1000);
+        }
+    }, 500);
+    
+    // Add staggered animation to elements
+    const elements = document.querySelectorAll('.dramatic-slide-up');
+    elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.2}s`;
+    });
+    
+    // Auto-redirect after 30 seconds (optional)
+    // setTimeout(() => {
+    //     window.location.href = '/Snacks';
+    // }, 30000);
+});
+</script>
+}
