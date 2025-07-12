@@ -4,7 +4,7 @@ using SnacksPOS.Infrastructure;
 
 namespace SnacksPOS.Application.Products;
 
-public record CreateProductCommand(string Name, string? Description, decimal Price, string? ImageUrl) : IRequest<Product>;
+public record CreateProductCommand(string Name, string? Description, decimal Price, string? ImageUrl, int Stock) : IRequest<Product>;
 
 public class CreateProductHandler : IRequestHandler<CreateProductCommand, Product>
 {
@@ -19,6 +19,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             Description = request.Description,
             Price = request.Price,
             ImageUrl = request.ImageUrl,
+            Stock = request.Stock,
             IsActive = true
         };
 

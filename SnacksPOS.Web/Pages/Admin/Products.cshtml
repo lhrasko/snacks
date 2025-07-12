@@ -1,0 +1,67 @@
+@page
+@model AdminModel
+@{
+    ViewData["Title"] = "Product Management";
+}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">📦 Products</h1>
+            <p class="text-lg opacity-80">Manage product catalog</p>
+        </div>
+        <div class="mb-6">
+            <form id="createForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input id="name" placeholder="Name" class="form-input" />
+                <input id="price" placeholder="Price" type="number" step="0.01" class="form-input" />
+                <input id="stock" placeholder="Stock" type="number" class="form-input" />
+                <input id="imageUrl" placeholder="Image URL" class="form-input" />
+                <input id="description" placeholder="Description" class="form-input col-span-full" />
+                <button type="submit" class="btn bg-blue-500 text-white">Add Product</button>
+            </form>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 text-left">Name</th>
+                    <th class="px-4 py-2 text-left">Price</th>
+                    <th class="px-4 py-2 text-left">Stock</th>
+                    <th class="px-4 py-2 text-left">Active</th>
+                </tr>
+            </thead>
+            <tbody id="productRows"></tbody>
+        </table>
+        <div class="text-center mt-8">
+            <a href="/Admin" class="text-blue-600 hover:text-blue-800">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function loadProducts(){
+ const resp = await fetch('/api/products');
+ const data = await resp.json();
+ const body = document.getElementById('productRows');
+ body.innerHTML = '';
+ data.forEach(p=>{
+   const row = document.createElement('tr');
+   row.innerHTML = `<td class="px-4 py-2">${p.name}</td><td class="px-4 py-2">$${p.price.toFixed(2)}</td><td class="px-4 py-2">${p.stock}</td><td class="px-4 py-2">${p.isActive}</td>`;
+   body.appendChild(row);
+ });
+}
+loadProducts();
+
+document.getElementById('createForm').addEventListener('submit', async e => {
+ e.preventDefault();
+ const product = {
+   name: document.getElementById('name').value,
+   description: document.getElementById('description').value,
+   price: parseFloat(document.getElementById('price').value),
+   imageUrl: document.getElementById('imageUrl').value,
+   stock: parseInt(document.getElementById('stock').value)
+ };
+ await fetch('/api/products', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(product)});
+ loadProducts();
+});
+</script>
+}

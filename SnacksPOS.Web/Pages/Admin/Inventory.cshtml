@@ -1,0 +1,51 @@
+@page
+@model InventoryModel
+@{
+    ViewData["Title"] = "Inventory";
+}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">📊 Inventory</h1>
+            <p class="text-lg opacity-80">Adjust stock levels</p>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 text-left">Product</th>
+                    <th class="px-4 py-2 text-left">Stock</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryRows"></tbody>
+        </table>
+        <div class="text-center mt-8">
+            <a href="/Admin" class="text-blue-600 hover:text-blue-800">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function loadInventory(){
+ const resp = await fetch('/api/products');
+ const data = await resp.json();
+ const body = document.getElementById('inventoryRows');
+ body.innerHTML='';
+ data.forEach(p=>{
+  const row=document.createElement('tr');
+  row.innerHTML=`<td class="px-4 py-2">${p.name}</td><td class="px-4 py-2"><input type='number' value='${p.stock}' data-id='${p.id}' class='form-input w-24 stockInput'/></td>`;
+  body.appendChild(row);
+ });
+}
+loadInventory();
+
+document.addEventListener('change', async e=>{
+ if(e.target.classList.contains('stockInput')){
+   const id=e.target.getAttribute('data-id');
+   const stock=parseInt(e.target.value);
+  await fetch(`/api/products/${id}/stock`,{method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(stock)});
+   loadInventory();
+ }
+});
+</script>
+}

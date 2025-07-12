@@ -1,0 +1,41 @@
+@page
+@model UsersModel
+@{
+    ViewData["Title"] = "Users";
+}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">👥 Users</h1>
+            <p class="text-lg opacity-80">Manage system users</p>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 text-left">Email</th>
+                    <th class="px-4 py-2 text-left">Roles</th>
+                </tr>
+            </thead>
+            <tbody id="userRows"></tbody>
+        </table>
+        <div class="text-center mt-8">
+            <a href="/Admin" class="text-blue-600 hover:text-blue-800">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+async function loadUsers(){
+ const resp=await fetch('/api/users');
+ const data=await resp.json();
+ const body=document.getElementById('userRows');
+ body.innerHTML='';
+ data.users.forEach(u=>{
+  const row=document.createElement('tr');
+  row.innerHTML=`<td class="px-4 py-2">${u.email}</td><td class="px-4 py-2">${u.roles.join(', ')}</td>`;
+  body.appendChild(row);
+ });
+}
+loadUsers();
+</script>
+}

@@ -1,0 +1,27 @@
+@page
+@model ReportsModel
+@{
+    ViewData["Title"] = "Reports";
+}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">📈 Reports</h1>
+            <p class="text-lg opacity-80">View sales statistics</p>
+        </div>
+        <div id="report"></div>
+        <div class="text-center mt-8">
+            <a href="/Admin" class="text-blue-600 hover:text-blue-800">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+async function loadReport(){
+ const resp=await fetch('/api/reports/sales');
+ const data=await resp.json();
+ document.getElementById('report').innerHTML=`<p>Total Sales: $${data.totalSales.toFixed(2)}</p><p>Transactions: ${data.totalTransactions}</p>`;
+}
+loadReport();
+</script>
+}

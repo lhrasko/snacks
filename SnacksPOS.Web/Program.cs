@@ -23,6 +23,10 @@ services.AddRazorPages(options =>
 });
 services.AddApplication();
 services.AddInfrastructure(builder.Configuration);
+services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
 
 // Add API documentation
 services.AddEndpointsApiExplorer();
@@ -160,7 +164,7 @@ app.MapPost("/api/products", async ([FromBody] CreateProductRequest request, IMe
 {
     try
     {
-        var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.ImageUrl);
+        var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.ImageUrl, request.Stock);
         var product = await med.Send(command);
         return Results.Created($"/api/products/{product.Id}", product);
     }
@@ -168,7 +172,7 @@ app.MapPost("/api/products", async ([FromBody] CreateProductRequest request, IMe
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("CreateProduct")
   .WithSummary("Create a new product")
   .WithDescription("Creates a new product in the system");
@@ -177,7 +181,7 @@ app.MapPut("/api/products/{id:int}", async (int id, [FromBody] UpdateProductRequ
 {
     try
     {
-        var command = new UpdateProductCommand(id, request.Name, request.Description, request.Price, request.ImageUrl, request.IsActive);
+        var command = new UpdateProductCommand(id, request.Name, request.Description, request.Price, request.ImageUrl, request.IsActive, request.Stock);
         var product = await med.Send(command);
         return product != null ? Results.Ok(product) : Results.NotFound();
     }
@@ -185,10 +189,26 @@ app.MapPut("/api/products/{id:int}", async (int id, [FromBody] UpdateProductRequ
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("UpdateProduct")
   .WithSummary("Update an existing product")
   .WithDescription("Updates an existing product with new information");
+
+app.MapPut("/api/products/{id:int}/stock", async (int id, [FromBody] int stock, IMediator med) =>
+{
+    try
+    {
+        var success = await med.Send(new UpdateProductStockCommand(id, stock));
+        return success ? Results.Ok(new { message = "Stock updated" }) : Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+}).RequireAuthorization("AdminOnly")
+  .WithName("UpdateProductStock")
+  .WithSummary("Update product stock")
+  .WithDescription("Updates only the stock count for a product");
 
 app.MapDelete("/api/products/{id:int}", async (int id, IMediator med) =>
 {
@@ -201,7 +221,7 @@ app.MapDelete("/api/products/{id:int}", async (int id, IMediator med) =>
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("DeleteProduct")
   .WithSummary("Delete a product")
   .WithDescription("Soft deletes a product by marking it as inactive");
@@ -222,7 +242,7 @@ app.MapGet("/api/reports/sales", async (
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("GetSalesReport")
   .WithSummary("Get sales report")
   .WithDescription("Generate sales report with optional date range and user filtering");
@@ -239,7 +259,7 @@ app.MapGet("/api/users", async (IMediator med, [FromQuery] int pageNumber = 1, [
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("GetUsers")
   .WithSummary("Get users with pagination")
   .WithDescription("Retrieve a paginated list of users");
@@ -264,7 +284,7 @@ app.MapPost("/api/users", async ([FromBody] CreateUserRequest request, IMediator
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("CreateUser")
   .WithSummary("Create a new user")
   .WithDescription("Create a new user account with specified roles");
@@ -289,7 +309,7 @@ app.MapPut("/api/users/{userId}", async (string userId, [FromBody] UpdateUserReq
     {
         return Results.BadRequest(new { error = ex.Message });
     }
-}).RequireAuthorization()
+}).RequireAuthorization("AdminOnly")
   .WithName("UpdateUser")
   .WithSummary("Update an existing user")
   .WithDescription("Update user information and roles");
@@ -297,7 +317,7 @@ app.MapPut("/api/users/{userId}", async (string userId, [FromBody] UpdateUserReq
 app.Run();
 
 // Request DTOs for API endpoints
-public record CreateProductRequest(string Name, string? Description, decimal Price, string? ImageUrl);
-public record UpdateProductRequest(string Name, string? Description, decimal Price, string? ImageUrl, bool IsActive);
+public record CreateProductRequest(string Name, string? Description, decimal Price, string? ImageUrl, int Stock);
+public record UpdateProductRequest(string Name, string? Description, decimal Price, string? ImageUrl, bool IsActive, int Stock);
 public record CreateUserRequest(string Email, string Password, List<string> Roles);
 public record UpdateUserRequest(string Email, List<string> Roles, bool IsActive);

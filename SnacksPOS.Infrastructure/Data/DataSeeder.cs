@@ -63,9 +63,9 @@ public static class DataSeeder
         if (!context.Products.Any())
         {
             context.Products.AddRange(
-                new Product { Name = "Turbo Trail-Mix", Description = "Energize!", Price = 1.50m },
-                new Product { Name = "Power-Up Protein Bar", Description = "Level up!", Price = 2.00m },
-                new Product { Name = "Mystery Chips", Description = "Surprise flavor", Price = 1.00m }
+                new Product { Name = "Turbo Trail-Mix", Description = "Energize!", Price = 1.50m, Stock = 100 },
+                new Product { Name = "Power-Up Protein Bar", Description = "Level up!", Price = 2.00m, Stock = 100 },
+                new Product { Name = "Mystery Chips", Description = "Surprise flavor", Price = 1.00m, Stock = 100 }
             );
             await context.SaveChangesAsync();
         }

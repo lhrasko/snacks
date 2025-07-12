@@ -8,4 +8,5 @@ public class Product
     public decimal Price { get; set; }
     public bool IsActive { get; set; } = true;
     public string? ImageUrl { get; set; }
+    public int Stock { get; set; }
 }

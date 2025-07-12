@@ -5,7 +5,7 @@ using SnacksPOS.Infrastructure;
 
 namespace SnacksPOS.Application.Products;
 
-public record UpdateProductCommand(int Id, string Name, string? Description, decimal Price, string? ImageUrl, bool IsActive) : IRequest<Product?>;
+public record UpdateProductCommand(int Id, string Name, string? Description, decimal Price, string? ImageUrl, bool IsActive, int Stock) : IRequest<Product?>;
 
 public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Product?>
 {
@@ -22,6 +22,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
         product.Price = request.Price;
         product.ImageUrl = request.ImageUrl;
         product.IsActive = request.IsActive;
+        product.Stock = request.Stock;
 
         await _db.SaveChangesAsync(cancellationToken);
         return product;

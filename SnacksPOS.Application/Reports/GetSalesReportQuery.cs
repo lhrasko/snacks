@@ -43,10 +43,20 @@ public class GetSalesReportHandler : IRequestHandler<GetSalesReportQuery, SalesR
         var totalTransactions = entries.Count;
         var averageTransaction = totalTransactions > 0 ? totalSales / totalTransactions : 0;
 
-        // Top products (this is simplified - in a real system you'd track individual items)
-        var topProducts = await _db.Products
+        var productSales = entries
+            .SelectMany(e => e.Items)
+            .GroupBy(i => i.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                Quantity = g.Sum(i => i.Quantity),
+                Revenue = g.Sum(i => i.Quantity * i.SnapshotPrice)
+            });
+
+        var topProducts = await productSales
+            .Join(_db.Products, ps => ps.ProductId, p => p.Id, (ps, p) => new ProductSalesItem(ps.ProductId, p.Name, ps.Quantity, ps.Revenue))
+            .OrderByDescending(p => p.Revenue)
             .Take(10)
-            .Select(p => new ProductSalesItem(p.Id, p.Name, 0, 0))
             .ToListAsync(cancellationToken);
 
         // Daily sales
