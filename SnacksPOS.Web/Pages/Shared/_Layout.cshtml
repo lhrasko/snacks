@@ -117,6 +117,10 @@
             <nav class="flex items-center space-x-1">
                 <a href="/Snacks" class="nav-link text-sm px-2 py-1">🍎 Snacks</a>
                 <a href="/Account" class="nav-link text-sm px-2 py-1">👤 Account</a>
+                @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                {
+                    <a href="/Admin" class="nav-link text-sm px-2 py-1">🛠 Admin</a>
+                }
                 @if (!SignInManager.IsSignedIn(User))
                 {
                     <a href="/SignIn" class="nav-link text-sm px-2 py-1 bg-primary-500/20 hover:bg-primary-500/30 text-primary-100">
