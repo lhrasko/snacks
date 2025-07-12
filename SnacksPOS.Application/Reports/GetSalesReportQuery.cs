@@ -51,13 +51,20 @@ public class GetSalesReportHandler : IRequestHandler<GetSalesReportQuery, SalesR
                 ProductId = g.Key,
                 Quantity = g.Sum(i => i.Quantity),
                 Revenue = g.Sum(i => i.Quantity * i.SnapshotPrice)
-            });
+            })
+            .ToList();
 
-        var topProducts = await productSales
-            .Join(_db.Products, ps => ps.ProductId, p => p.Id, (ps, p) => new ProductSalesItem(ps.ProductId, p.Name, ps.Quantity, ps.Revenue))
+        // Get product names for the top selling products
+        var productIds = productSales.OrderByDescending(p => p.Revenue).Take(10).Select(p => p.ProductId).ToList();
+        var products = await _db.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+
+        var topProducts = productSales
+            .Join(products, ps => ps.ProductId, p => p.Id, (ps, p) => new ProductSalesItem(ps.ProductId, p.Name, ps.Quantity, ps.Revenue))
             .OrderByDescending(p => p.Revenue)
             .Take(10)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         // Daily sales
         var dailySales = entries
